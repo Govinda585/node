@@ -1,0 +1,208 @@
+1. Middleware (imp)
+One of the core concept of express is middleware and middleware function. Middleware function
+is a function that takes a req object and either return response to the client or pass control
+to the another middleware function.
+
+We already saw two example of middleware functions
+one is route handler 
+
+app.get("/",  => this is middleware (req, res) =>{
+    res.send("this is middleware function");
+})
+
+technacally, every route handler functions is middleware function becasue it req obj and 
+return res to client.
+
+another e.g 
+app.use(express.json()); // this is also a middleware function.
+
+express include some build-in middleware function and we can also create custom middleware.
+we can put custom middleware infront of our request processing pileline. so every request
+that we get on the server go through our middleware function, with this custom middleware
+function we can perform cross-cutting consern like login, authencation, authorization, etc.
+An express application is essentially nothings but a bunch of middleware function.
+
+***********************************************************************
+ 
+2. Create Custom Middleware function.
+
+ app.use((req, res, next) =>{
+     console.log("Logging...");
+     next(); // this function pass to another middleware function
+ });
+
+// middleware function are called in sequale. In terms of clean coding, when we create 
+a custom middleware function we don't want to write all code in index.js. We should
+put each middleware in saparate file.
+
+***********************************************************************
+
+3. Build-in Middleware
+app.use(express.json());
+// json() parses the body of the request and if there is a json object it will populated 
+req.body property.
+
+app.use(express.urlencoder());
+// urlencoder() pares incoming req with urlencoder payload that is req with body like this
+key=value&key=value. This more of a treditional apporach. If we have a html form with 
+input form then urlencolder() required.
+
+app.use(express.static('public')); // public is a folder
+// we gone put static assets like css, img and so on inside public folder.
+With this middleware we can serve static content
+
+***********************************************************************
+
+4. Third party middleware 
+list of third party middleware: https://expressjs.com/en/resources/middleware.html
+
+if we use more middlware, that impact the performance of our application.
+if we do not need the functionality that come with the middleware then don't use 
+that just going to slow down your request processing.
+
+look at the some build-in middleware 
+helmet - helps secure our app by setting various HTTP headers.
+
+morgan - HTTP request logger. by default morgan logs the req on console. we can 
+also configure it to write it to log file. again remember when we turn on this feature 
+it will impect our request processing pipeline so perheps may do not do in production or 
+we may want to enable only in certain situation.
+
+***********************************************************************
+
+5. Environment 
+In more complex or enterprise like application you need to know what environement your code is 
+running on. Is it a development enviroment or production env perheps you may want to enable 
+or disable certain feature based on current env. for e.g let imagine you wanna enable login of 
+a http req only in dev env but not in production.
+
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`); // if NODE_ENV is not 
+defiend then it return undefiend.
+console.log(`app: ${app.get('env')}`); if env is not defined then it return 
+development. default env is develpment.
+
+we can use any of them it's our choise.
+
+***********************************************************************
+
+6. Configuration
+one topic that goes hand on hand with env is configuraiton. Topic of storing configuration setting
+for the app and overridding those  setting for each env. for e.g in dev env you goona use 
+diff. database or mail server. In this leacture we are going to learn of how to store 
+config setting for an app and override them for each env. There are many node package for 
+managing configuration. one of the most popular is rc and another is config.
+
+1. install config model 
+ npm install config 
+
+2. create a folder called config (check config folder here we have default.json file for defualt 
+configuraiton)
+
+defualt.json // defiend default setting for our app.
+development.json // in this file we defined setting specific to development
+we can override the defualt setting. that mean i can change the name.
+production.json // this is for production 
+
+note: you should never store app secret like password of database. The way we deal with 
+this secret is by storing them in env varibles.
+
+export password=1234 (to prevent this env varibles to clash with other env varible we 
+can prefix this with our app name )
+export app_password = 1234
+
+In dev env we menually set this env varibles also in production env we most likely have 
+configuratin pannel for storing our env varibles.
+
+
+Now create custom-environment-variables.json file in config folder. (name should be like this)
+In this file we defiend the mapping of config setting to env varibles.
+
+
+We can read json file, env varibles, command line argument. to learn 
+more about this you need to look at documentation.
+
+***********************************************************************
+
+7. Debugging 
+The better way to log message for the purpose of dubugg is by using dubgger.  
+we can use dubug package. we can use env  varialbes to enable and disable 
+we can also determie the level of debugging infromtion like sometime we only 
+one see the debugging of database.
+
+
+install package 
+cmd: npm install debug 
+
+import debug from "debug";
+const startupDebugger = debug("app:start");
+const dbDebugger = debug("app:db");
+startupDebugger("starup deubgger");
+dbDebugger("this debugger for db");
+
+
+set env for debug 
+export DEBUG=app:start (if we want to see msg for debug);
+export DEBUG=app:db (if we wnat to see msg for db);
+export DEBUG=    (if we don't want to see msg of debug);
+
+we can also set env variable during starting an app.
+CMD: DEBUG=app:db nodemon index.js 
+
+***********************************************************************
+
+8. Templating Engines
+In all the above endpoint we are returning json object. Sometime we have to return 
+html markup to the client so that we need to use templating engine. There are many 
+templating engines some are Pug, Mustache, EJS. each templating engine have different
+syntex. In this section we are going to use Pug.
+
+Pug generate the dynamic html and return it to the client.
+
+set pug 
+
+app.set("view engine", 'pug') // we don't need to import it, express automatically 
+load it.
+
+app.set("views", './views'); // all our view template store inside this folder. 
+this is optional. if we want to replace existance view other other new one.
+
+  // this is for template engine. to render dynamic html
+    res.render('index', {title:"My Express app", message:"Hello world!"})
+
+***********************************************************************
+
+9. Database integration
+https://expressjs.com/en/guide/database-integration.html
+there are various db driver. Later we will learn mongodb or mongoose.
+We can use any of above drive like redis, msql, psql, etc.
+
+***********************************************************************
+
+10. Authentication
+Authentication is outside of express. Later in the course we are going to 
+learn about authentication and authorization.
+
+***********************************************************************
+
+11. Structuring Express Applications 
+create seperate file for each route like for course have each file and 
+authors have each file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

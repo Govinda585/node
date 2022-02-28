@@ -1,0 +1,79 @@
+*************************************************************
+1. What is node?
+Node js is a open source, cross-plateform runtime environment for executing javascirpt code
+outside of a browser(server).
+we often use node to build back-end servies also called API(Application Programming Interface).
+Node is idea for building highly-scalable, data-intensive and real-time apps.
+
+1.1 Why to use node js?
+- Greate for prototyping and agile development.
+- use for building superfast and highly scalable services. it is used in large company such as 
+  Uber, Netflix, Paypal etc.
+- Cleaner and more consistent codebase.
+- large ecosystem of open-source library.
+
+*************************************************************
+
+2. Node Architecture (Runtime environment is a environment in which a program or application is
+executed)
+
+Before node we use javascirpt only to build Application run inside a browser. Every browser out
+there what we called JS Engine that takes our JS code and convert it to machine code. for e.g
+Chakra (microsoft edge), V8(Chrome), SpiderMonkey(firebase).
+Browser provide run time environment for JS code. Up to 2009 the only way to run js code 
+is inside browser. In 2009 Ryan Dahl crator of node js came up with grate idea and he tooks
+google v8 engine which is a fastest JS engine out there and enbedded it inside a C++ Programming
+and called that program node.
+Similar to browser node is a runtime environment for JS code. With node js we can work with
+filesystem, network, etc.
+
+*************************************************************
+
+3. How node works
+- Node app are highly scalable because of asynchronous or non blocking nature of node. 
+- what is asynchronous nature:- let say you went to resturent, a waiter come and takes
+your order and go to the kitchen and told a order item to a chef and come and 
+take another order. waiter does not wait in kitchen to cook the recipes insted of that 
+he take another order and chef is cooking a recipes. This is a metaphor of asynchronous 
+Architecture. This is how node app work.
+
+- A single thread is used to handle multiple request.
+- Node is ideal for I/O-intensive apps.
+- Do not use Node for CPU-intensive apps like video encoding, image manuplation, etc.
+  kind of app that have alots of calculation that happen in CPU. 
+- it is used for data intensive and real time intensive apps.
+
+*************************************************************
+
+4. Your first node program
+function sayHello(name){
+    console.log("hello" + name)
+}
+sayHello(Govinda)
+
+node fileName (to execute code)
+
+node is a C++ program that include chrome v8 engine. node give code to v8 engine to execution.
+windows, documention objects are not part of node because they execute in browser. in node we
+other object to work with file, OS, etc.
+
+*************************************************************
+
+5. Course Structure
+we will study the topic given below:
+1. Node Module System
+2. Node Package Manager (NPM)
+3. Building RESTful APIs with Express
+4. Asynchronous javascirpt(Callback, promise and async/await)
+5. Storing data in MongoDB
+6. Authentication and Authorization (Role management using JSON web token)
+7. Handling and Logging Errors
+8. Unit and Integration testing.
+9. Test Driven Development  (TDD)
+10. Deployment
+
+
+
+
+
+

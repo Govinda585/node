@@ -1,0 +1,14 @@
+{
+  "name": "npm-demo",
+  "version": "1.0.0",
+  "description": "practice",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "govinda bist",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^6.0.13"
+  }
+}

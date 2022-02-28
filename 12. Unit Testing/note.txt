@@ -1,0 +1,68 @@
+1. What is Automated Testing?
+
+is it replacement for manual testing?
+Do i really need it?
+How should i do it?
+Test first(TDD) or code first?
+or should write the applicaion code first.
+
+Automated testing is the practice of writing code to test our code,
+and  run those tests in an automated fashion.
+
+Now we can application code and test code 
+
+
+********************************************
+
+2. Benefits of automated testing
+
+1. test your code frequently in less time 
+2. Catch bugs before deploying
+3. Deploy with confidence
+4. reudce the bug and improve the quality of software 
+5. Refactor with confidence
+Refactoring means changing the structure of the code 
+without changing its behavior.
+if you rename a method that is refactoring. when we don't 
+have automated test every time you refactor you code then 
+we have to test it menually that is time consuming but with 
+automated test we can test easy.
+6. It helps you focus more on quality of method writing method.
+
+
+********************************************
+
+3. Types of Tests
+
+In automated testing we have three types of test 
+Unit test 
+Integration test 
+End-to-end
+
+1. Unit test 
+Tests a unit of an application without its external dependencies such as 
+files, database, web service, etc. Unit test code are cheap to write
+and execute fast so we can run 100's of them in a few seconds.
+In this way we can verify each block of code is working or not in an 
+application however without integration we it does not give a lots 
+of confidents.
+
+2. Integration test 
+Tests the application with its external dependencies so it test 
+the integration of application code like files, database and so on.
+This takes loger to execute because it often invove in reading and 
+writing data but it give more confidence.
+
+3. End-to-end test 
+Drives and application through its UI. They are specific tools build 
+to for creating end to end test. one popular tool is Selenium.
+Which allows us to record interaction of user with our app and play
+back and check if the app is returing the right result or not.
+This test give you the greatest confidence but they have to big 
+problem first is they are too slow and second  problem is very 
+brittle.
+
+********************************************
+
+4. 
+

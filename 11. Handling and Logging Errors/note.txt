@@ -1,0 +1,249 @@
+1. Handling and logging errors 
+
+let asume that unexpectely mongodb connection faild in our application after that 
+we will not able to interact with app so at that time we should user or client 
+error message. Mongo db throw the unhandlePromiseRejection.
+
+When may face error in our application.
+Handling eror (Remember this points)
+Send friendly error message
+Log the exception
+
+************************************************
+
+2. Handling Rejected Promises
+ use try catch block to handle rejection 
+ router.get("/", async(req, res) =>{
+     try{
+         const student = await Student.find();
+         res.json({student});
+     }
+     catch(ex) {
+         // Log the Exception
+         res.status(500).json({message:"something failed"});
+     }
+ })
+
+************************************************
+
+3. Express Error MiddleWare
+
+In the above we took the first step to handle error properly.
+Let say we want to change the messages in the future. with the current 
+implemention we need to go the every rotuer and change it and also we 
+need to change log the expcetion.
+
+So we wanna move this logice somewhere in the center so if we want 
+to change the message in th future we need to change only one place.
+
+We have special kind of middleware function in Express called Error Middleware 
+we register this error middleware after all the existing middleware function.
+
+
+app.use(middleware1);
+app.use(middleware2);
+
+// Error MiddleWare
+
+app.use(function(err, req, res, next){
+    // add all the logic for handing error
+
+       // Log the Exception
+         res.status(500).json({message:"something failed"});
+})
+
+In Route 
+
+router.get("/", async(req, res, next) =>{
+     try{
+         const student = await Student.find();
+         res.json({student});
+     }
+     catch(ex) {
+       next(ex);
+     }
+ })
+
+Now With this implementation we have single place to handle an error 
+
+In the real world application logic for exception is several line long.
+so we don't adding all this in index.js We only add high level arragement.
+details should be encapsulate in different module.
+
+SO we are going to add above error middleware funtion in middleware folder.
+
+However we have to add try catch block in every route handler.
+This is repatative so in the next lecture we are going to learn 
+how to fix this.
+
+************************************************
+
+4. Removing try/catch blocks 
+
+
+
+
+// middleware function
+
+const asyncMiddleware = (handler ) =>{
+    return async(req,res,next) =>{
+    try{
+ // router code....
+
+ await handler(req, res);
+    }
+    catch(ex){
+        next(ex)
+    }
+}
+}
+
+// router
+
+router.get("/post", asyncMiddleware( (req,res) =>{
+       const product = await Product.find();
+}))
+
+
+************************************************
+
+5. Express Async Error 
+npm i express-async-errors
+
+use this package to remove asyncMiddleware and it still work.
+In case in your application it does not work then use the 
+above approach.
+
+************************************************
+
+6. Logging Errors 
+
+In the enterprise application we need to log the exception that are 
+thrown in the app, leter we will come and see which part of an app we 
+need to imporve.
+
+We have popular library for logging is called winston.
+
+npm i winston
+
+import winston 
+winston is a defualt logger that is export.
+we can also create custom logger.
+
+winston have transport(storage device for our logs)
+1. Console
+2.File
+3.Http
+There are other plugin in winston to work with mongodb, couchdb, redis and loggy
+
+************************************************
+
+7. Logging to mongodb 
+
+const logger = winston.createLogger({
+    level:'error',
+    transports:[new winston.transports.File({filename: 'error.log'}),
+new winston.transports.MongoDB({db: 'mongodb://localhost:/database1'})]
+
+})
+logger.error(er.message, er);
+
+************************************************
+
+8.Uncaught Exception
+uncaught mean not caught.
+error middleware we added only catch error happen during request pipeline
+It does not caught if a error is thrown outside of context of express 
+this middleware does not catch error.
+
+e.g 
+throw new Error("something wrong");
+// this error is thrown outside the context of processing of request.
+
+// this error will crash the process and winston not able to catch error.
+
+How to properly handle unhandle exception in node process.
+This is at higher level and not tie to express 
+
+process.on("uncaughtException", (ex) =>{
+    console.log("WE GOT UNCAUGHT Exception");
+    winston.error(ex.message, ex);
+});
+
+(process object is a eventEmitter, eventEmitter is a object
+that can emit or publish events. it gives a method called on(emit or publish event))
+
+
+************************************************
+
+9. Unhandled Promise Rejections
+we had handle uncaught exception in the above part but that 
+aproach only work with sync aproach not work with async.
+
+e.g
+const p = Promise.reject(new Error("async error"));
+p.then(() =>console.log("done"));
+
+but i'm not goging to call catch so the above code is 
+unhandle promsie rejction.
+
+
+How to deal with unhandle prmise rejection?
+
+process.on("unhandledRejection", (ex) =>{
+    console.log("WE GOT UNHANDLED Exception");
+    winston.error(ex.message, ex);
+});
+
+one imporant note: wather you are dealing with unhandle or uncaught exception 
+you should terminate node process so you should exit here. Because at this point 
+your process can be on unclean state. SO terminate the process and restart it.
+
+If we terminate the process how we can restart the process in production?
+There are tools for that like Process Manager.
+process.on("unhandledRejection", (ex) =>{
+    winston.error(ex.message, ex);
+    process.exit(1); // 0 mean success and anything except 0 is failear.
+});
+
+
+we can use winston to handle above two exception unhandle and uncaught and 
+also store in log.
+
+Should i log error in file or db?
+you should log in both file and database.
+db is good for querying data.
+if db server goes down then we can look at files system.
+************************************************
+
+10. Error Handling Recap
+1. error handling middleware 
+in this middleware we have four arguments like error, req, res, and next 
+and we log it by using package called winston and 
+send friendly message to the client.
+
+This only work in request processing pipleline 
+so we need to use procees.on to log error outside   
+request processing pipleline.
+
+************************************************
+
+11. Extracting Routes
+
+************************************************
+
+12. Extracting DB Logic
+************************************************
+
+13.Extracting Logging Logic
+************************************************
+
+14.Extracting config Logic
+************************************************
+15.Extracting validation Logic
+************************************************
+16. Showing unhandle exception on the console
+
+winston.handleExceptions(
+    new winston.transports.Console({colorize: true, preetyPrint: true})
+)

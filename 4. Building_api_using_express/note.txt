@@ -1,0 +1,162 @@
+In this section we are going to learn about express and restful services.
+
+1. RESTful services
+Now a days lots of application are based on client server architecture. Client is a frontend part
+and server is a backend part. The communication betwn client and server happen using HTTP protocal 
+that also power the web. REST mean Representational State Transfer, It is used to build 
+the http service to communication betwn client and server. There are common method of HTTP like
+GET (to get the data), POST(post the data), PUT(to update the data) and DELETE(to delte the data).
+
+************************************************************
+
+2. Introduction of express
+Express is a node js framework. 
+install express:
+cmd: npm install express
+
+************************************************************
+
+3. Building your first web server
+Import express from "express";
+const app = express();
+app.get();
+app.post();
+app.put();
+app.delete();
+// there are lots of method in this app object.
+
+************************************************************
+
+4. Nodemon (node monitor)
+cmd npm install -g Nodemon (now we don't have to restart node app everytime on changes)
+it restart automatically on changes
+
+***********************************************************
+
+5. Environment varibles
+we are using port no 3000 staically that only work on our dev environment but when we push our
+app in production it may not work that why we need to defiend port no dynamically that work
+on different environment.
+
+we have global object called process.
+const port = process.env.PORT || 3000;
+
+set env varibles
+cmd export PORT=5000
+
+In windows set PORT=5000
+
+if we don't want to store env varibles on our system or device then we can use 
+in our node application with the help of package called dotenv.
+
+***********************************************************
+
+6. Route parameters
+Route parameters is a parameters which is passed in url or route to get a specific data. for e.g 
+
+http://localhost:3000/api/courses/:id  // id is a name of our parameters.
+
+also it is possible to have multiple parameters in routes e.g 
+http://localhost:3000/api/courses/:years/:month
+
+with express we can also get query string parameters.
+e.g 
+http://localhost:3000/api/courses?sortBy=name
+
+
+different betwn route parameters and query string parameters
+we use query string parameters to provide additional data for backend server.
+query string parameters use for anythings that is optional.
+
+res.send(req.params);
+we use route parameters for essental or required values.
+
+res.send(req.query);
+
+***********************************************************
+
+7. Handling HTTP get request
+
+// GET SIGNLE COURSE FROM THE SERVER
+
+app.get("/api/courses/:id", (req, res) =>{
+    const course = courses.find((c) => c.id === parseInt(req.params.id));
+    if(!course) return res.status(404).send("course with given id was not found!")
+    res.send(course);
+})
+
+***********************************************************
+
+
+8. Handling HTTP post request
+
+// HTTP POST REQUEST
+app.post("/api/courses", (req, res) =>{
+    const course = {id: courses.length + 1, name: req.body.name};
+    courses.push(course);
+    res.send(course);
+})
+
+***********************************************************
+
+
+9. Input validation (important)
+
+As a security best practice you should always validate the Input
+
+we can validate input field with the if condition but when we have long list of input at that time we should 
+use library like JOI
+
+cmd: npm i joi
+
+e.g 
+// HTTP POST REQUEST
+app.post("/api/courses", (req, res) =>{
+    // if(!req.body.name || req.body.name.length < 3) return res.status(400).send("name must be include and length should be > 3");
+   
+
+    // input validation
+const result = schema.validate(req.body);
+if(result.error) return res.status(400).send( result.error.details[0].message)
+    const course = {id: courses.length + 1, name: req.body.name};
+    courses.push(course);
+    res.send(course);
+})
+
+***********************************************************
+
+10. Handling PUT and DELETE request (check practice 4, 5);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

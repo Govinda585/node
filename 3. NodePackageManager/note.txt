@@ -1,0 +1,166 @@
+Node Package Manager (NPM)
+NPM is a command line tool as well as a registery of a third party libarary that we can add in node app.
+
+1. create Package.json
+package.json is a json file that include some basic info about the app or project like it's name, version,
+author, git repo. it is a metadata of an application.
+
+creat package.json file: npm init
+note: Before adding any node packages in node app you need to create package.json.
+when you start node project always create package.json
+
+shortcut for package.json npm init -y (we do not go through each question).
+
+***************************************************************************
+
+2. Installing a node package
+npm install packageName
+
+***************************************************************************
+
+3. Using a package
+var _ = require('underscore');
+
+first node think it's a core Module but we don't have underscore core module then it 
+is inside our file or project but here we did not specify path like ("./underscore");
+now it assume it exist inside node_modules.
+
+In Short:
+// Core Module
+// File or Folder
+// node_modules
+
+***************************************************************************
+
+4. Package Dependencies
+package Dependencies are store inside a folder called node_modules.
+
+5. NPM Package and Source Control Manager (SCM)
+
+Never include node_modules folder in git and during sharing a project with other.
+we can resotre node_modules by npm install. it will download required Dependencies.
+
+.gitignore
+node_modules/
+
+***************************************************************************
+
+6. Sementic version
+in package.json we have Dependencies inside this we have package like
+"mongoose": "^4.13.6"  // what is Caret ^ 
+
+To understand ^ this first we have to understand sementic version which is also called SemVer
+
+In sementic version in node package we have three components, first no called major version, second 
+version called minor version and third is called Patch version (which is used for bug fixes).
+
+Minor version is used to adding new features that don't break the existance api.
+When they add new features that break the existance api then they increase major version.
+
+^ symbol tells npm that we are intrested in any version of mongoose as long as major is version is 4.
+
+in some project you might see ~ insted of ^. ~ Tilde mean you are intrested in major and minor same 
+as last one like 4.13 in mongoose.
+
+***********************************************************************
+
+7. Listing the installed packages
+cmd: npm list (list all the Dependencies)
+cmd: npm list --depth=0 (that only show the Dependencies which we installed in our project)
+
+***********************************************************************
+
+8. Viewing registery info for a package
+search package name in npm website or fastest way is search in CLI
+
+cmd: npm view packageName
+e.g npm view mongoose
+
+to only view Dependencies
+cmd: npm view mongoose dependencies
+
+to only view version
+cmd: npm view mongoose versions
+
+***********************************************************************
+
+9. Installing a specific version of a package.
+cmd: npm install mongoose@2.4.2
+
+***********************************************************************
+
+10. Updating Local Packages
+to findout what package are outdated and what are the new version
+cmd: npm outdated 
+
+to udate
+cmd: npm update (this only work for minor and patch release)
+
+to update dependencies to very latest verison 
+cmd: npm install -g npm-check-updates
+
+after that do npm install (above only package.json are updated)
+
+***********************************************************************
+
+11. DevDependencies
+
+there are two types of dependencies. one is application dependencies which is neceassary to
+funtion our application and other one is dev dependencies. some time we need dependencies only
+during development like running unit test. dev dependencies should not go in production.
+
+instal dev dependencies
+cmd: npm install packageName --save-dev
+
+***************************************************************************
+
+12. Uninstall package
+cmd: npm uninstall packageName (un for short)
+
+
+13. Working with global package
+cmd: npm install -g packageName (install package globally)
+
+14. Publising a package
+
+1. create account on npm (cmd: npm adduser)
+2. login (cmd: npm login)
+3. publish package (cmd: npm publish) (note in package.json package name should be unique 
+otherwise you will get an error)
+4. nam used in any project
+
+15. Updating a published package
+after ading new features 
+
+first update version
+cmd: npm version minor
+then run 
+cmd: npm publish
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

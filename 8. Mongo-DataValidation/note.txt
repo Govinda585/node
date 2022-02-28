@@ -1,0 +1,259 @@
+Mongo data validation 
+
+*********************************************************************
+1. Validation 
+we are only going to talk about required validator, by the way we have more 
+build-in validator. we are going to learn about them in next lecture.
+
+const coureSchema = new mongoose.Schema({
+    name:{type: String, required: true},
+    author: String,
+    tags: [String],
+    date: {type: Date, default: Date.now}
+    isPublished: Boolean,
+    price: Number
+});
+
+- now we have to pass name otherwise we will get error like 
+  unhandled rejection.
+  to get proper error msg use try catch.
+
+- Validation automatically kick out during when we save.
+  we can also meanually trigger validation.
+
+  try{
+      await course.validate():
+  }
+
+the validation we implemented on name property that is only meaningful in mongoose.
+Mongodb does not care about name property.
+In SQL, in this db we defiend validation at the db level. for e.g 
+course have colume we mark that as required but mongodb does not care about that.
+
+Note: Early in the lecture we learned about JOI validation, we use joi for validation in restAPI,
+we may have question should we use JOI or mongoose validation.
+answer is we should use both, this both compliment each other.
+
+JOI validate: WE use that as a first attack to make sure the data send by client is valid.
+
+mongoose validation: TO make sure that the data save to the database is in the right shape.
+
+**********************************************************************************
+
+2. Build-In Validator
+In above section we learned about required validator which is one of the build in validator.
+Here we are going to look more build in validtor in this section. 
+
+we can set required property as boolean or set as function which return boolean.
+This is useful when you wanna conditionally make your req or not.
+let e.g 
+price is only required if the course is published.
+
+const courseSchema = now mongoose.Schema({
+    name:{type: String,
+     required: true,
+     minLength; 5,
+     maxLength: 255,
+     match: /pattern/},
+     catogory:{
+         type:String,
+         enum: ["web", "mobile", "blockchain"] // when creating a course category should be one of this 
+         otherwise we will get validation error.
+     }
+    author: String,
+    tags: [String],
+    date: {type: Date, default: Date.now}
+    isPublished: Boolean,
+    price: {type: Number,
+    min:10,
+    max 22,
+    required: function() {return this.isPublished; }}
+})
+
+warning: Our validator will not work if we replace above function with arrow function.
+
+Depending on the type of properties we have different build in validation like for 
+String minLength, maxLength, match, etc. and we have min and max for number.
+
+**********************************************************************************
+
+3. Custom validators
+
+sometimes build-in validator in mongooses don't give us a validation we need.
+in tags property we want to atleast one tag. we need validator here.
+if we pass empty array that will be perfect by the mongoose point of view so 
+we need custom validator.
+
+
+const courseSchema = now mongoose.Schema({
+    name:{type: String,
+     required: true,
+     minLength; 5,
+     maxLength: 255,
+     match: /pattern/},
+     catogory:{
+         type:String,
+         enum: ["web", "mobile", "blockchain"] // when creating a course category should be one of this 
+         otherwise we will get validation error.
+     }
+    author: String,
+    tags: {
+        type: array,
+        validate: {
+            validator: function(v){
+                // implement custom validation logic
+                return v && v.length > 0;   
+            }, 
+            // we can also set custom message here
+            message: "A course should have atleast one tag";
+        }
+    }
+    date: {type: Date, default: Date.now}
+    isPublished: Boolean,
+    price: {type: Number,
+    min:10,
+    max 22,
+    required: function() {return this.isPublished; }}
+})
+
+
+**********************************************************************************
+
+4. Async Validators 
+
+Sometime validation logic may involed reading sometime reading from db or from remote http service.
+We don't have the answer straight away, in that case we need async validator. lets goo here 
+
+const courseSchema = now mongoose.Schema({
+    name:{type: String,
+     required: true,
+     minLength; 5,
+     maxLength: 255,
+     match: /pattern/},
+     catogory:{
+         type:String,
+         enum: ["web", "mobile", "blockchain"] // when creating a course category should be one of this 
+         otherwise we will get validation error.
+     }
+    author: String,
+    tags: {
+        type: array,
+        validate: {
+            isAsync: true,
+            validator: function(v, callback){
+                setTimeout(() => {
+                      // Do some async work
+                      const result = v && v.length > 0;  
+                        callback(result)
+                }, 2000)
+            }, 
+            // we can also set custom message here
+            message: "A course should have atleast one tag";
+        }
+    }
+    date: {type: Date, default: Date.now}
+    isPublished: Boolean,
+    price: {type: Number,
+    min:10,
+    max 22,
+    required: function() {return this.isPublished; }}
+})
+
+
+**********************************************************************************
+
+5. Validation Errors
+
+we are going to learn about the error object.
+
+async function createCourse(){
+    const course = new Course({
+        name: "Node js",
+        category: '-',
+        author: "govinda",
+        tags: null,
+        isPublished: true,
+        price: 15
+    })
+
+    try{
+        const result = await course.save();
+        console.log(result);
+    }
+    catch(ex){
+       // console.log(ex.message);
+       for (field in ex.errors)
+       console.log(ex.errors[field]) // this will show the whole object.
+       // if you want to get validation error messgae for each invalid property:
+       console.log(ex.errors[field].message)
+
+    }
+}
+
+errors: In this object we have seperate property or each invalid property in our course object. 
+Like above category and tags are the invalid property. With this we will get the error message of 
+category and tags.
+
+
+**********************************************************************************
+
+5. SchemaType Options
+When we defiend the type of the property we can define directly like this 
+author: String 
+or we can defined schema type object
+category:{
+    type:String,
+    required: true
+}
+
+we already learned about the different types of property like required, max, min and other.
+In this lecture we are going the learn about few more property that are avabile in schema type 
+object.
+
+1. lowercase: true (mongoose will automatically set value into lowercase)
+2. uppercase: tru (set value into uppercase)
+3. trim: true (mongoose will automatically removes those paddings)
+
+we have couple more properties in this schema type object, this is use to define any property
+irrespective to it's type.
+
+for e.g 
+we always want to round the value of price 
+price:{
+    type: Number,
+    required: true,
+    get: v => Math.round(v),
+    set: v => Math.round(v)
+}
+
+**********************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

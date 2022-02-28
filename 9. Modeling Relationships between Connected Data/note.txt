@@ -1,0 +1,206 @@
+1. Modelling Relationships
+
+Till now, we have worked with single self content document, but in the real world 
+the entity and concept that we worked with they have some kind of assocation for e.g 
+
+we have Course document and we have author property but author may have 
+more than one entity like author name, address, contact no, etc.
+
+In this topic we are going to learn about how to work with related objects.
+ 
+ Basically we have two aproach: 
+
+ 1. Using References (Normalization)
+ 2. Using Embedded Documents (Denormalization)
+
+** Using Reference (Normalization)
+e.g 
+let author = {
+    name: "Mosh"
+}
+
+let course = {
+    author: "id" // here we are using references
+}
+// in relational database we have concept of relationship which enforce data 
+integraty, but in nosql we don't have relationship so even though i'm 
+setting id of an other in course that are not related to each other.
+if we pass wrong id then mongodb does not care.
+
+Course might have multiple authors 
+let course = {
+    authors : [
+        'id1', 'id2'
+    ]
+}
+
+** Using embedded documents (Denormalization)
+Here we can embedded author document inside of a course documents.
+
+let Course = {
+    author: {
+       name: "Govinda"
+    }
+You may have question which approach should i use?
+
+Each approach have each strange and weekness. To choose really depends upon
+application and it's quering requirement.
+
+We need to trade of between query performance vs consistency.
+
+With the first approach If i need to change the name of author then i have to 
+modify it in single place. so with the first approach we have consistency.
+Howevery every time query a course we need to an extra query to load related author.
+Sometime that extra query may not be big deal but in certain time we have to run 
+query as fast as possible in this case we need to use second approach denormalization.
+
+With this approach we can load a course object and it's author with single query,
+because author is inside course object. However if we need to update author name in 
+future then chance are there multiple course document that need to be updated and update 
+operation does not complete succesfully it is possible that we havesome course document not 
+updated so we end up with inconsistance data.
+
+first approach give us consistency and second approach give us performance.
+So We have to trade off between this two, we do not have both of them.
+
+
+** We have a third approach which is called hybride approach.
+
+Imagine each author has 50 properties we don't want to duplicated all inside a course 
+document. So we can have a seperate collection of author.
+
+e.g // Hybrid
+
+let author = {
+    name: "Govinda"
+    // 50 other properties
+}
+
+
+leet course = {
+author :{
+    id: "ref",
+    name: "Govinda"
+}
+}
+
+with this approach we can quicky read course object along with this autor so we can 
+optimize our query performance but we don't have to store all the properties of 
+author inside a course document. This approach is perticullary useful if you wanna 
+have a snapshot of data at a point in a time.
+
+For e.g 
+Imagine you are desigining ecommerce application there we will have collection
+like order, products, etc. In each order we need to store snapshot of a product
+because we wanna know the price of product in a given point of time.
+
+****************************************************
+
+2. and 3. Referencing Documents (check index.js)
+let Author = {
+    name: String
+}
+
+let Course = {
+    name: String,
+    author:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref: Author
+    }
+}
+****************************************************
+
+
+4. Embedding Documents (check embedding.js)
+
+
+****************************************************
+
+5. Using an array of sub documents (check subdocArray.js)
+
+
+
+****************************************************
+
+6. and 7. movie and rental project 
+
+****************************************************
+
+8. Transactions
+In relational database we have a concept call transaction. Transaction is a group of operations 
+that should be perform as a unit, either all the performance complete and change the 
+state of database. If something failed in the middle all this operation that has been 
+applied will be rolled back and our db go back into initial state.
+
+In mongodb we don't have transactions. we have a technic called two phase commits.
+
+Learn two phase commit by yourself that is not included on this topic beacuse 
+this is a advance topic.
+
+We have a library(fawn) that give usa concept of transactions but internally use the two phase 
+commits.
+npm install fawn.
+
+*********************************************************
+
+9. ObjectID 
+
+In mongodb we have long id like this 
+
+// _id: 507f1f77bcf86cd799439011
+
+here we have 24 char and every two char represent 2 bytes so we have 
+12 bytes to uniquely identiy document in mongodb.
+
+first 4 bytes represent timestamp.
+we don't need to create seperate property like created at in our document 
+because we can get it from the id.
+
+next 3 bytes represent machine identifier 
+next 2 bytes represent process identifier 
+and last 3 bytes represent counter (order increament 1,2,3)
+
+With this 12 bytes we can define uniqely identiy document in mongodb.
+
+
+There is very very low change that two objectID may same.
+
+// 1 bytes = 8 bits
+// 2^8 = 256  (in 1 bit there is 2 digit, so 1 byte have 256 digit).
+// 3^24 = 16M (in 3 byte we can store 16M digit)
+
+If we generate more than 16M documents in a same second, same machine and  same process than the 
+counter will overflow and that where we end up with two document with same ID.
+
+So ObjectID is also unique not 100%.
+In mongod ID is not generated by mondodb itself. It is generated by driver so we don't 
+have to wait mongod to generate this unique ID that why mongodb is highly scaleable.
+we can have several instanances of mongodb and we don't have to talk to central place to talk
+central place to get unqiue ID. The driver itself genere unique ID.
+
+we can also generate objectID with mongodb 
+const id = new mongoose.Types.ObjectId();
+
+To get timestamp 
+
+id.getTimestamp();
+
+To validate objectId 
+
+const id = mongoose.Types.ObjectId.isValid("1212");
+clg(id); // false 
+
+
+*********************************************************
+
+10. WE need joi-objecID package to validate objectID.
+
+
+
+
+
+
+
+
+
+

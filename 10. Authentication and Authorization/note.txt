@@ -1,0 +1,265 @@
+Authentication and Authorization 
+
+*****************************************************************
+1. Introduction 
+
+Authentication is a process of identifying if th e user is who they clam.
+That's why we login.
+
+Authorization is determining if the user have right permission to given 
+operation.
+
+We are going to add two endpoint here Register and Login.
+
+
+*****************************************************************
+
+2. Create the user model
+check user.js models
+
+
+*****************************************************************
+
+3. Registering user 
+create route check user.js router
+
+*****************************************************************
+
+4. Using Lodash
+We are using lodash which is optimize  version of underscore.
+
+res.send({
+    name: user.name,
+    email: user.email,
+})
+// here we are repeting user to make this simle we are going to use lodash
+
+  res.status(200).send(_.pick(user, ["name", "email"]));
+
+  JOI password complexity (use it if you want to make password complexity)
+
+We are storing password in plane text that is very very bad so we are going to use hashing.
+
+*****************************************************************
+
+5. Hashing Passwords (check hash.js)
+We are going to use Bcrypt package to hash password. 
+
+
+*****************************************************************
+
+6. Authenticating Users (check auth.js, this is for login)
+
+*****************************************************************
+
+7. Testing login 
+
+*****************************************************************
+
+8. JSON Web Tokens
+When user login we are returning ture insted of that we have to return json web token.
+Json web token is a long string that identify the user. As a metafor we thik as a driver 
+licence.
+
+         login
+client --------->server
+client <--------server
+          JWT
+
+We have to store jwt in client for future api calls. Client can be a web app or mobile app.
+IF it's a web and building using react or angular we can use local Storeage in every browser.
+If we are building mobile app we have similar option. 
+
+
+*****************************************************************
+
+9. Generating Authentication Token (check auth.js)
+
+const token = jwt.sign(
+    { _id: user._id},
+    process.env.JWT_PRIVATE_KEY
+  ); // never store secret in source code, store in env.
+  res.status(200).send(token);
+});
+
+
+*****************************************************************
+
+10. Storing secret 
+
+create .env file and store jwtprivatekey 
+
+in index.js 
+
+if(!process.env.JWT_PRIVATE_KEY){
+  console.log("FETAL ERROR: jwtprivatekey is not defined.)
+  process.exit(1);
+}
+
+// if jwtprivate key is not defined then we have to exit the server.
+*****************************************************************
+
+11. Setting response header
+When a user register we asume that they are logged we don't want to login 
+seperately ofcousre this required does not require to every app.
+sometime we want to enforce a user to verify email address 
+
+(check practical user)
+send a jwt in response header and read this in localstorage 
+client and next time when we make api call we send it to the server.
+
+
+*****************************************************************
+
+12. Encapsulating logic into mongo model (check user.js model)
+We are generating jwt token in auth.js and we had written same code in user.js. if in future we 
+have to add more payload then we need to go to each file and add new object. In the long run 
+we may forget to added this object in jwt payload so we have to encapsulate token generated logic 
+into mongodb model.
+
+immautre programmer may think creating function like 
+
+function generateAuthToken(){} // and reuse in other modules.
+// it's work but with this approach lots of function hanging all over the place.
+
+In object oriented programming we have a principle called Information Expert Principle that means 
+an object that has enough information and is an expert in a given area that object should be 
+responsbile for making descision and performaing task. e.g a chef has a knowlede and 
+experience of cooking so his role in hotel is to cook food. Witer not work of cooking.
+
+code to genrate methods in mongodb model 
+
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign({ _id: this._id }, process.env.JWT_PRIVATE_KEY);
+  return token;
+};
+
+*****************************************************************
+
+13. Authorization middleware (check auth.js middleware)
+
+Only the authencate user can access the api so we can check the user have token or not.
+
+const token = req.header("x-auth-token);
+if(!token) return res.status(401).send("token not match").
+
+We have to write this code in every route but repeating same code is bad that 
+why we are going to use middleware.
+
+// code
+const jwt = require("jsonwebtoken");
+module.exports = (req, res, next) => {
+  const token = req.header("x-auth-token");
+  if (!token) return res.status(401).send("Access denied. No token provided");
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_PRIVATE_KEY);
+    req.user = decoded;
+    console.log(decoded);
+    next();
+  } catch (e) {
+    res.status(400).send("Invalid token");
+  }
+};
+
+in middleware either we pass to next middleware or terminate the request.
+
+*************************************************
+
+14. Protecting routes 
+
+we can use above middleare in the index.js 
+app.use(auth());
+but we want some route should be public 
+so we have to use in routes.
+
+// like this
+router.post("/", auth, async (req, res) => {
+  const course = new Course({
+    name: req.body.name,
+  });
+  const result = await course.save();
+  res.status(200).send(result);
+});
+
+******************************************************
+
+15. getting the current user 
+In lots of application there are times we need to get the information about the currently loggined user.
+
+we can use route like this 
+router.get(/:id) that is fine we can get the info of user by passing id but this is not secure in 
+security because anyone can send id and get user info from the user which have private data.
+
+The approach we use often 
+
+router.get(/me) // with is client is not going to send user id. We get it from the jwt so i can not change 
+someone else jwt because in order to do so i need to create new digital signature.
+
+//
+
+router.get(/me, auth, async(req,res) =>{
+ const user = await User.findById(req.user._id).select('_password');
+ res.send(user);
+})
+
+******************************************************
+16. Logging out a user 
+Do we need seperate route to logout?
+No because we are not storing token in server so we have to logout in client app by deleting token.
+Please never store token in db because when a hacker hack db then he can access all the account.
+Securites best practice whenever you sending a token from the client to server make sure to use https.
+hacker setting in the middle can not read because data is encrypted during sending from client into server.
+
+******************************************************
+
+17.
+Role based authorization  (check admin.js middleware)
+Let imagine such as deleting data an be performed by admin.
+
+add Admin: Boolean in model.
+
+now we have an user have admin. When they logined i want to include this admin property in jwt payload. 
+Next time they send jwt to the server we can extract directly from token we don't have to fetch it from db.
+
+practical: 
+create admin.js middleware
+
+THE END
+
+******************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

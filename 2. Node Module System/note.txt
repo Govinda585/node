@@ -1,0 +1,194 @@
+Node Module System
+
+some of the module like OS, fileSystem, events, HTTP are build in node.
+we will learn how to use this module and also learn to create own modules.
+
+******************************************************************
+
+1. Global Object
+
+example of global object console.log();
+global object mean we can access it anywhere in any files.
+we have other object and function that are globally availabe like setTimeout(), clearTimeout(),
+setInterval(), clearInterval().
+
+In browser we have windows global object.
+In node we have global.
+
+note variable we defiend are not global for e.global
+var name = "govinda";
+console.log(global.name) // undefiend output
+they are only scope to the file where we defiend.
+
+******************************************************************
+
+2. Modules
+the main problem with global scope is that if we defiend same variable in different file the
+last one will override.
+
+In order to build reliable and maintainable application we should avoid defining variable 
+and function in global scope. Insted we need modules. moduels are small building block 
+where we defiend variable and function.
+
+In node core concept, every file in node consider as 
+module. the varible and function defined in this module are only scope to that file. in another 
+word they are private. 
+
+In order to use defined varibles and function in other file we need to export it and 
+make it public.
+
+Every node app have atleast one module which is called main module e,g app.js
+
+do conosle.log(module) // check output
+
+main point: 
+var and function inside a module is private.
+every file in node app are module.
+use export to make it public and use in another file.
+
+
+******************************************************************
+
+3. Creating a module (check logger.js)
+
+module is a js file which have varibles and function.
+to make it public: 
+module.exports.log = log; (now the log function is public)
+
+
+
+
+******************************************************************
+
+4. Loading a modules 
+to load the module we have to use require method. e.g 
+const logger = require("./logger");
+ logger.log("hello everyone logger")
+
+ logger is a object in which log method involved.
+ if we want to export just a function or method we can write like this.
+ module.exports = log;
+ rather than 
+ module.exports.log = log;
+
+ now we can call it like this 
+
+ logger("hello everyone logger");
+
+******************************************************************
+
+5. Module Wrapper function
+Now you know varibles and function are private in node but you might be wonder how 
+node do this?
+
+Node execute module code which is surrendered by a 
+function(exports, require, module, __filename, __dirname)
+{
+
+}
+node does not excute directly it is surrounded by function().'
+
+require is not global.
+the above function with arguments called wrapper function.
+
+__filename represnet the this filename and 
+__dirname represent the dir name.
+
+we learn about the module. by node itself come with useful modules.
+we are going to learn about them in next lecture.
+
+******************************************************************
+
+6. Path Module
+
+it give us utility function to work with path.
+const path = require("path");
+const pathObj = path.parse(__filename);
+
+output: 
+{
+  root: '/',
+  dir: '/home/govinda/My Projects/Mosh Courses/The Complete Node.js Course/NOde Js Notes/Practice',
+  base: 'pathModule.js',
+  ext: '.js',
+  name: 'pathModule'
+}
+******************************************************************
+
+7. OS Module 
+With OS module we can get the information about the current operating system.
+
+const os = require('os');
+
+******************************************************************
+
+8. File System Module
+File system module is use to work with file and dir.
+
+there are two types of method in file system.
+asyc and sync. always use async method.
+
+const fs = require('fs');
+
+ fs.readdir('./', (error, files) =>{
+    if(error) console.log(error);
+    else console.log(files);
+});
+always come method in pair so use async one 
+// output
+[
+    'FSModule.js',
+    'OSModule.js',
+    'app.js',
+    'logger.js',
+    'pathModule.js'
+  ]
+
+******************************************************************
+
+9. Events Module (imp)
+One of the core concept of node is event. A lot of node core functionality of
+is based on this concept of event. A event is a signal that indicate somethings
+has happened in our app. 
+for e.g 
+In node we have a class called HTTP which is use to build a web server. so we listen 
+on a given port. Everytime we received a req on port that http raised an event. our 
+job is to res to that event which basically involed reading that req and returing 
+the right response. 
+
+******************************************************************
+
+10. Event arguments (check EventArugments.js)
+Quit offen when we raise an event we also want to send some data. we can pass
+data passing through arguments. event arguments are the arguments which pass
+in event.
+
+******************************************************************
+
+11. Extending EventEmitter (check ExtendingEvent.js)
+when we want to raise event and listen event in two different file at that time 
+we are using two object that does not work. To make it work we have to
+create a class and raise an event and export the class and use same object in another 
+file to listen an event. 
+
+
+******************************************************************
+
+12. HTTP Module (check httpModule.js)
+One of the powerful building block of node is the HTTP module that is use to create networking
+application for e.g we can create a web server listen on http server at the given port. 
+
+******************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+

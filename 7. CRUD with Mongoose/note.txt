@@ -1,0 +1,284 @@
+1. Introduction
+
+MongoDB is a document database or nosql database with the scalability and flexibility that you
+want with the querying and indexing that you need. In mongodb we don't have the concept of table,
+schema, view, records, columns. Unlike relational database where you have to design database, in 
+mongodb no need to desing db and schema. when we query data we get json object in mongodb.
+
+IMPORTANT:- Schema, modals and query is the main concept in mongodb.
+
+**********************************************************************************************
+
+2. Connecting to MongoDB
+
+import mongoose from "mongoose";
+
+mongoose.connect("mongodb://localhost/newdb"); 
+
+// when we want to deploy our app in production env, we have to set differnt connection string,
+we can set this by config or env. That we learned in past video.
+
+**********************************************************************************************
+
+3. schema
+
+We use schema to defiend the shape of document within a collection in mongodb.
+Collection in mongodb is like table in rdms
+documents in mongodb is like rows in rdms
+Documents is container of key value pair.
+We have concept called schema only in mongoose not in mongodb.
+
+How to create schema?
+
+const courseSchema = new mongoose.Schema({
+    name: String,
+    autor: String,
+    tags: [String],
+    date: {type: Date, default: Date.new},
+    isPublished: Boolean
+})
+
+
+Here is the list of types we can use when creating a schema.
+1. String
+2. Number
+3. Date 
+4. Buffer (saved in binary form like image)
+5. Boolean
+6. ObjectID (Assigning for unique identifier)
+7. Array
+
+**********************************************************************************************
+
+4. Models
+After creating a course schema we need to compile into a models.
+Models is like a object.
+
+
+class -> Course
+object is a models -> nodeCourse
+
+const Course = mongoose.model("Course", courseSchema)
+
+**********************************************************************************************
+
+5.saving a Document
+
+we can use save method to save document.
+it return promise so covered with async/await and use try catch to catch errors.
+
+**********************************************************************************************
+
+6. Query Documents
+
+Retrive document from mongodb database.
+
+const courses = Course.find({author:'Govinda', isPublished:'true'})  // we can also pass the filder in find method.
+.limit(10)
+.sort({name: 1}) // 1 sorting on ascending order -1 mean descending order
+.select({name: 1, tags: 1}); let course have 50 propetires we don't want to 
+retrive all to the client. we only want to return name from the doc.
+
+**********************************************************************************************
+
+7. Comparison query operators
+
+In mongodb we have bunch of operators for comparing values. mongoose is build on top of mongodb
+so mongoose can understand those operators. 
+
+Here are the list of comparison operators that we have in mongodb.
+eq -> equal
+ne -> not equal
+gt -> greater than
+gte -> greater than or equal to
+lt -> less than
+lte -> less than equal to 
+in -> in mean inside
+nin-> not in
+
+e.g 
+const courses = await Course
+.find({price: 10}) // eg of eq.
+.find({price: {$gt: 10}}) // we can use above operators as a key during comparison. // e.g of greater than
+
+.find ({price: {$gte: 10, $lte: 20}}) // find course between 10 and 20 dollors.
+
+. find ({price: {$in : [10, 20, 30]}}) // find course that have price 10,20,30.
+
+
+**********************************************************************************************
+
+8. Logical Query operators
+ 
+we have OR and AND Logical operators
+
+const courses = await Course
+.find()
+.or([{autor:"govinda"}, {isPublished:true}])
+.and([{autor:"govinda"}, {isPublished:true}])
+
+***********************************************************************************************
+
+9. Regular expression
+
+If we want more control over filtering string then you should use regular expression.
+
+let we want to get course whose author name start with govin
+
+const courses = await Course.find({author: /^govin/}) ^ represent string 
+
+let say we want to get course whose author name end with bist
+
+const course = await Course.find({author: /bist$/i}) // $ present end with provided string
+to make caseinsensative
+we need to add i at the end
+
+let say we want ot get course whose author name contanin at start, middle or beginning.
+
+const course = await Course.find(/{.*govin.*/}) .* mean 1 or more character after does 
+not matter same for last .*
+
+***********************************************************************************************
+
+10. Counting (counting the total no of documents)
+find the no of document
+const courses = await Course.find().count(); // return total no of document.
+
+***********************************************************************************************
+
+11. Pagination
+
+we have skip() method to implement pagination. remember that skip() method and 
+
+limit() method goes hand on hand.
+
+const pageNumber = 2
+const pageSize = 10
+
+const courses = Course.find().
+skip(pageNumber - 1) * pageSize)
+.limit(pageSize)
+
+***********************************************************************************************
+
+12. Updating a document- Query first
+
+Basically there are two aproach to update a document in mongodb.
+1. one is query first
+In this aproach 
+we find the doucment by id
+then we modify it's propetires
+and save.
+
+const updateCourse = async() =>{
+    const course = await Course.findById(id);
+    if(!course) return;
+    course.isPublished = true;
+    course.author = "another author";
+    
+    //another aproach
+
+    course.set({
+        isPublished: true,
+        author: "another author'
+    })
+// which one you choose that upon you.
+
+const result = await course.save();
+console.log(result);
+
+}
+
+this aproach is mostly used like in other framework.
+
+2. second is update first
+in this aproach insted of retirving document first we go to document and update
+directly.
+
+optianally we can get updated document.
+
+**************************************************************************
+
+13. Updating a document- update first
+
+query first approach is useful if you received input from the client 
+ and you wanna make sure input is a valid operator.
+
+
+ when we  are not receiving input from the client and we want to update
+ document directly on a database at that time we 
+ have to use update first approach.
+
+ insted of findById we use update method.
+
+ const result = await Course.update({_id: id}, {  // in second obj parameter we use mongodb update operators
+ $set:{
+     author: Mosh,
+     isPublished: false,
+ }
+
+ }, {new: ture})
+
+console.log(result);
+
+
+if we want to get the original document than use findByIdandUpdate() method.
+if we want to get the updated document than use findByIdandUpdate() method and use
+object{new: true}
+
+ check this: https://docs.mongodb.com/manual/reference/operator/update/
+
+***************************************************************************
+
+14. Removing document
+
+const course = await Course.deleteOne({_id: id});
+
+to delete multiple document insted of deleteOne use deleteMany.
+
+to get the number of document deleted findByIdandRemove();
+
+**************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
